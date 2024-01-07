@@ -105,7 +105,7 @@ async function funcTwo(input, callback) {
     for(let i = 0;i < dat.length; i++)
     {
         download(dat[i]["url"], i + 1)
-        toWrite = toWrite + " -i ./public/input" + (i+1) + ".mp4";
+        toWrite = toWrite + " -i ./downloads/input" + (i+1) + ".mp4";
         cnt += 1;
     }
     toWrite = toWrite + ' -filter_complex "';
@@ -117,7 +117,7 @@ async function funcTwo(input, callback) {
     {
         toWrite = toWrite + "[v" + i + "][" + i + ":a]"
     } 
-    toWrite = toWrite + ' concat=n=' + cnt + ':v=1:a=1[outv][outa]" -map "[outv]" -map "[outa]" -c:v libx264 -c:a aac -vsync 2 -strict experimental /home/ryaan/Drive/Master/' + Date.now() + '.mp4\n\nrm -rf ./public';
+    toWrite = toWrite + ' concat=n=' + cnt + ':v=1:a=1[outv][outa]" -map "[outv]" -map "[outa]" -c:v libx264 -c:a aac -vsync 2 -strict experimental ./master' + Date.now() + '.mp4\n\nrm -rf ./downloads';
     fs.writeFileSync('./merge.sh', toWrite); 
 }
 function download(link, name){
@@ -127,7 +127,7 @@ let ytDlpEventEmitter = ytDlpWrap
         '-f',
         'best',
         '-o',
-        "./public/input" + name  +".mp4",
+        "./downloads/input" + name  +".mp4",
     ])
     .on('progress', (progress) =>
         console.log(
