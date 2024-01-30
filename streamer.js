@@ -4,10 +4,8 @@ const fs = require('fs')
 var shell = require("shelljs")
 require('dotenv').config()
 
-function pad(str)
-{
-    if((str + "").length < 2)
-    {
+function pad(str) {
+    if((str + "").length < 2) {
         str = "0" + str;
     }
     return str;
@@ -21,8 +19,7 @@ let end_day
 let start_year
 let end_year
 
-function makeDates(daysBack, monthS, monthE, dateS, dateE, yearS, yearE)
-{
+function makeDates(daysBack, monthS, monthE, dateS, dateE, yearS, yearE) {
     days = daysBack
     start_month = monthS
     end_month = monthE
@@ -30,41 +27,28 @@ function makeDates(daysBack, monthS, monthE, dateS, dateE, yearS, yearE)
     end_day = dateE
     start_year = yearS
     end_year = yearE
-    if(end_day-days < 1)
-    {
+    if(end_day-days < 1) {
         days = days - start_day
-        if(start_month - 1 == 0)
-        {
+        if(start_month - 1 == 0) {
             start_month = 12
             start_year -= 1
-        }
-        else
-        {
+        } else {
             start_month -= 1
         }
         if(start_month == 4 || start_month == 6 || start_month == 9 ||start_month == 11)
         {
             start_day = 30
-        }
-        else if(start_month == 2 && start_year % 4 == 0)
-        {
+        } else if(start_month == 2 && start_year % 4 == 0) {
             start_day = 29
-        }
-        else if(start_month == 2 && start_year % 4 != 0)
-        {
+        } else if(start_month == 2 && start_year % 4 != 0) {
             start_day = 28
-        }
-        else
-        {
+        } else {
             start_day = 31;
         }
-        if(days >= 0)
-        {
+        if(days >= 0) {
             makeDates(days, start_month, end_month, start_day, start_day, start_year, end_year)
         }
-    }
-    else
-    {
+    } else {
         start_day = pad(end_day-days)
         end_day = pad(new Date().getDate())
         start_month = pad(start_month)
