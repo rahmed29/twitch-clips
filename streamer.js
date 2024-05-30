@@ -5,6 +5,7 @@
 const useSubAlert = true;
 
 const YTDlpWrap = require("yt-dlp-wrap").default;
+// must install ytp-dlp on your system and instantiate node wrapper w/ binary location
 const ytDlpWrap = new YTDlpWrap("/bin/yt-dlp");
 const fs = require("fs");
 var shell = require("shelljs");
