@@ -1,8 +1,10 @@
-// i wrote this script when I knew basically nothing about programming. It is very bad but I don't want to touch it because it works and time complexity doesn't really matter here since you will have at most 20 clips
-// I'm sorry.
+// I wrote this script when I knew basically nothing about programming. It is very bad but I don't want to touch it because it works and the FFMPEG command is so long I feel like some stuff that seems extremely inefficient is necessary.
+// But then again time complexity doesn't really matter here since you will have at most 20 clips so who rly cares
 
 // set to false if you don't want chroma key'd sub reminder. Sub alert must be in ./ dir and titled template.mp4
 const useSubAlert = true;
+// which clip the sub alert should be on. Defaults to 2
+const subAlertClipNum = 2;
 
 const YTDlpWrap = require("yt-dlp-wrap").default;
 // must install ytp-dlp on your system and instantiate node wrapper w/ binary location
@@ -149,9 +151,9 @@ async function myFunc(str) {
 }
 
 let toWrite = useSubAlert ? `
-ffmpeg -i ./downloads/input2.mp4 -i ./template.mp4 -filter_complex "[1:v]chromakey=0x00D700:0.1:0.2[green];[0:v][green]overlay[outv]" -map "[outv]" -map "0:a" -c:v libx264 -c:a aac -strict experimental ./downloads/input2_sub.mp4\n
-rm ./downloads/input2.mp4\n
-mv ./downloads/input2_sub.mp4 ./downloads/input2.mp4\n
+ffmpeg -i ./downloads/input${subAlertClipNum || 2}.mp4 -i ./template.mp4 -filter_complex "[1:v]chromakey=0x00D700:0.1:0.2[green];[0:v][green]overlay[outv]" -map "[outv]" -map "0:a" -c:v libx264 -c:a aac -strict experimental ./downloads/input${subAlertClipNum || 2}_sub.mp4\n
+rm ./downloads/input${subAlertClipNum || 2}.mp4\n
+mv ./downloads/input${subAlertClipNum || 2}_sub.mp4 ./downloads/input${subAlertClipNum || 2}.mp4\n
 ffmpeg` : "ffmpeg";
 
 async function funcTwo(input, callback) {
