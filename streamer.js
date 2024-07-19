@@ -1,5 +1,4 @@
-// I wrote this script when I knew basically nothing about programming. It is very bad but I don't want to touch it because it works and the FFMPEG command is so long I feel like some stuff that seems extremely inefficient is necessary.
-// But then again time complexity doesn't really matter here since you will have at most 20 clips so who rly cares
+// I wrote this script when I knew basically nothing about programming. It is very bad but I don't want to touch it because it works and the FFMPEG command is rly long
 
 // set to false if you don't want chroma key'd sub reminder. Sub alert must be in ./ dir and titled template.mp4
 const useSubAlert = true;
