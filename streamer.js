@@ -159,6 +159,7 @@ function beginDownloading(input) {
     cnt +
     ':v=1:a=1[outv][outa]" -map "[outv]" -map "[outa]" -c:v libx264 -c:a aac -vsync 2 -strict experimental ' +
     MASTER_DIR +
+    "/" +
     vidName +
     `.mp4\n\nrm -rf ./downloads`;
   finished = true;
