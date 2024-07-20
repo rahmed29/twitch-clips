@@ -156,8 +156,8 @@ async function getClipsFromId(
   );
 
   if (response.ok) {
-    const body = await response.json();
-    beginDownloading(body);
+    const clips = await response.json();
+    beginDownloading(clips);
   } else {
     console.error("TWITCH API RESPONSE NOT OK. ERROR: " + response.status);
   }
