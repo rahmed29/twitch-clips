@@ -6,69 +6,33 @@ const shell = require("shelljs");
 require("dotenv").config();
 
 // time delta function
-function makeDates(
-  days,
-  start_month,
-  end_month,
-  start_day,
-  end_day,
-  start_year,
-  end_year
-) {
-  if (end_day - days < 1) {
-    days = days - start_day;
-    if (start_month - 1 == 0) {
-      start_month = 12;
-      start_year -= 1;
-    } else {
-      start_month -= 1;
-    }
-    if (
-      start_month == 4 ||
-      start_month == 6 ||
-      start_month == 9 ||
-      start_month == 11
-    ) {
-      start_day = 30;
-    } else if (start_month == 2 && start_year % 4 == 0) {
-      start_day = 29;
-    } else if (start_month == 2 && start_year % 4 != 0) {
-      start_day = 28;
-    } else {
-      start_day = 31;
-    }
-    if (days >= 0) {
-      return makeDates(
-        days,
-        start_month,
-        end_month,
-        start_day,
-        start_day,
-        start_year,
-        end_year
-      );
-    }
-  } else {
-    start_day = (end_day - days).toString().padStart(2, "0");
-    end_day = new Date().getDate().toString().padStart(2, "0");
-    start_month = start_month.toString().padStart(2, "0");
-    end_month = end_month.toString().padStart(2, "0");
-    console.log(
-      "Time Range: " +
-        start_month +
-        "/" +
-        start_day +
-        "/" +
-        start_year +
-        " to " +
-        end_month +
-        "/" +
-        end_day +
-        "/" +
-        end_year
-    );
-    return [start_month, end_month, start_day, end_day, start_year, end_year];
-  }
+function makeDates(daysBack) {
+  let today = new Date();
+  let start = new Date(today);
+  start.setDate(today.getDate() - daysBack);
+  let start_month = start.getMonth() + 1;
+  let end_month = today.getMonth() + 1;
+  let start_day = start.getDate();
+  let end_day = today.getDate();
+  let start_year = start.getFullYear();
+  let end_year = today.getFullYear();
+  console.log(
+    "Time Range: " +
+      start_month +
+      "/" +
+      start_day +
+      "/" +
+      start_year +
+      " to " +
+      end_month +
+      "/" +
+      end_day +
+      "/" +
+      end_year
+  );
+  return [start_month, end_month, start_day, end_day, start_year, end_year].map(
+    (date) => date.toString().padStart(2, "0")
+  );
 }
 
 // clear downloads folder
@@ -80,6 +44,9 @@ const CLIENT = process.env.CLIENT;
 const USE_SUB_ALERT = process.env.USE_SUB_ALERT.toLowerCase() === "true";
 const SUB_ALERT_CLIP_NUM = process.env.SUB_ALERT_CLIP_NUM;
 const SUB_ALERT_FILE = process.env.SUB_ALERT_FILE;
+
+// directory to save completed video
+const MASTER_DIR = process.env.MASTER_DIR;
 
 // switch to true after everything is finished
 let finished = false;
@@ -123,7 +90,11 @@ async function getIdFromName(name, dates) {
     console.log(name + "'s broadcaster ID: " + body["data"][0]["id"]);
     getClipsFromId(body["data"][0]["id"], dates);
   } catch (err) {
-    console.error("TWITCH API RESPONSE NOT OK. ERROR: " + err);
+    console.error(
+      "Couldn't get ID from name, error: " +
+        err +
+        "\nIf this error is not an http status code, There is most likely no ID associated with that name."
+    );
   }
 }
 
@@ -161,12 +132,12 @@ async function getClipsFromId(
     const clips = await response.json();
     beginDownloading(clips);
   } else {
-    console.error("TWITCH API RESPONSE NOT OK. ERROR: " + response.status);
+    console.error("Couldn't fetch Clips from ID, error: " + response.status);
   }
 }
 
 // download clips and keep build FFMPEG command
-async function beginDownloading(input) {
+function beginDownloading(input) {
   const vidName = Date.now();
   var cnt = 0;
   let dat = input["data"];
@@ -186,14 +157,15 @@ async function beginDownloading(input) {
   toWrite +=
     " concat=n=" +
     cnt +
-    ':v=1:a=1[outv][outa]" -map "[outv]" -map "[outa]" -c:v libx264 -c:a aac -vsync 2 -strict experimental ./master/' +
+    ':v=1:a=1[outv][outa]" -map "[outv]" -map "[outa]" -c:v libx264 -c:a aac -vsync 2 -strict experimental ' +
+    MASTER_DIR +
     vidName +
     `.mp4\n\nrm -rf ./downloads`;
   finished = true;
 }
 
 // download a single clip
-function dl(link, name) {
+async function dl(link, name) {
   let ytDlpEventEmitter = ytDlpWrap
     .exec([link, "-f", "best", "-o", "./downloads/input" + name + ".mp4"])
     .on("progress", (progress) =>
@@ -224,18 +196,7 @@ readline.question(
     const strmr = name.split(":")[0];
     const days = name.split(":")[1];
     dt = new Date();
-    getIdFromName(
-      strmr,
-      makeDates(
-        days,
-        dt.getMonth() + 1,
-        dt.getMonth() + 1,
-        dt.getDate(),
-        dt.getDate(),
-        dt.getFullYear(),
-        dt.getFullYear()
-      )
-    );
+    getIdFromName(strmr, makeDates(days));
     readline.close();
   }
 );
@@ -243,6 +204,7 @@ readline.question(
 // execute FFMPEG command on exit
 process.on("exit", () => {
   // only execute command if everything worked
+  console.log("Done, executing FFMPEG command...");
   if (finished && toWrite != "ffmpeg") {
     shell.exec(toWrite);
   }
