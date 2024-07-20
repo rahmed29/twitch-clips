@@ -75,6 +75,8 @@ function makeDates(
 shell.exec("rm -rf ./downloads");
 
 // process environment variables
+const AUTH = process.env.AUTH;
+const CLIENT = process.env.CLIENT;
 const USE_SUB_ALERT = process.env.USE_SUB_ALERT.toLowerCase() === "true";
 const SUB_ALERT_CLIP_NUM = process.env.SUB_ALERT_CLIP_NUM;
 const SUB_ALERT_FILE = process.env.SUB_ALERT_FILE;
@@ -110,8 +112,8 @@ async function getIdFromName(name, dates) {
     {
       method: "GET",
       headers: {
-        Authorization: process.env.AUTH,
-        "Client-Id": process.env.CLIENT,
+        Authorization: AUTH,
+        "Client-Id": CLIENT,
       },
     }
   );
@@ -149,8 +151,8 @@ async function getClipsFromId(
     {
       method: "GET",
       headers: {
-        Authorization: process.env.AUTH,
-        "Client-Id": process.env.CLIENT,
+        Authorization: AUTH,
+        "Client-Id": CLIENT,
       },
     }
   );
