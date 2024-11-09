@@ -1,3 +1,5 @@
+// Yeah idk why I made this is js it would probably be better to use python and use concurrent thread pools to handle downloading multiple videos at once or something idk
+
 const YTDlpWrap = require("yt-dlp-wrap").default;
 
 // must install ytp-dlp on your system and instantiate node wrapper w/ binary location
@@ -7,6 +9,7 @@ require("dotenv").config();
 
 // time delta function
 function makeDates(daysBack) {
+  daysBack = parseInt(daysBack) || 0;
   let today = new Date();
   let start = new Date(today);
   start.setDate(today.getDate() - daysBack);
@@ -48,9 +51,6 @@ const SUB_ALERT_FILE = process.env.SUB_ALERT_FILE;
 // directory to save completed video
 const MASTER_DIR = process.env.MASTER_DIR;
 
-// switch to true after everything is finished
-let finished = false;
-
 // start building FFMPEG command
 let toWrite =
   USE_SUB_ALERT && SUB_ALERT_CLIP_NUM && SUB_ALERT_FILE
@@ -87,13 +87,15 @@ async function getIdFromName(name, dates) {
 
   try {
     const body = await response.json();
-    console.log(name + "'s broadcaster ID: " + body["data"][0]["id"]);
-    getClipsFromId(body["data"][0]["id"], dates);
+    if (body.error) {
+      console.error(body);
+    } else {
+      console.log(name + "'s broadcaster ID: " + body["data"][0]["id"]);
+      getClipsFromId(body["data"][0]["id"], dates);
+    }
   } catch (err) {
     console.error(
-      "Couldn't get ID from name, error: " +
-        err +
-        "\nIf this error is not an http status code, There is most likely no ID associated with that name."
+      "Couldn't get ID from name. There is most likely no ID associated with that name."
     );
   }
 }
@@ -162,7 +164,6 @@ function beginDownloading(input) {
     "/" +
     vidName +
     `.mp4\n\nrm -rf ./downloads`;
-  finished = true;
 }
 
 // download a single clip
@@ -195,7 +196,7 @@ readline.question(
   "Enter a broadcaster username and how many days back to search separated by a colon:\n",
   (name) => {
     const strmr = name.split(":")[0];
-    const days = name.split(":")[1];
+    const days = name.split(":")[1] || 0;
     dt = new Date();
     getIdFromName(strmr, makeDates(days));
     readline.close();
@@ -205,8 +206,10 @@ readline.question(
 // execute FFMPEG command on exit
 process.on("exit", () => {
   // only execute command if everything worked
-  console.log("Done, executing FFMPEG command...");
-  if (finished && toWrite != "ffmpeg") {
+  if (toWrite != "ffmpeg") {
+    console.log("Done, executing FFMPEG command...");
     shell.exec(toWrite);
+  } else {
+    console.log("Exiting without doing anything.");
   }
 });
