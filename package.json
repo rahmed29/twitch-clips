@@ -5,7 +5,7 @@
   "main": "game.js",
   "dependencies": {
     "balanced-match": "^1.0.2",
-    "brace-expansion": "^1.1.11",
+    "brace-expansion": "^1.1.21",
     "concat-map": "^0.0.1",
     "dotenv": "^16.4.5",
     "fs.realpath": "^1.0.0",
